@@ -3,3 +3,6 @@ xcuserdata/
 .DS_Store
 build/
 DerivedData/
+.claude/
+.build/
+.swiftpm/
