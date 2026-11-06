@@ -2,22 +2,27 @@ import SwiftUI
 
 struct TorrentListView: View {
     @ObservedObject var viewModel: TorrentListViewModel
-    @Binding var selectedTorrent: Torrent?
+    @Binding var selection: Set<String>
     @Binding var showingAddTorrent: Bool
 
     var body: some View {
         VStack(spacing: 0) {
             if let error = viewModel.errorMessage {
-                ErrorBanner(message: error)
+                ErrorBanner(message: error, countdown: viewModel.retryCountdown, onRetry: { viewModel.retryNow() })
             }
 
-            List(viewModel.filteredTorrents, selection: Binding(
-                get: { selectedTorrent?.hash },
-                set: { hash in selectedTorrent = viewModel.torrents.first { $0.hash == hash } }
-            )) { torrent in
+            List(viewModel.filteredTorrents, selection: $selection) { torrent in
                 TorrentRowView(torrent: torrent, viewModel: viewModel)
                     .tag(torrent.hash)
-                    .contextMenu { contextMenu(for: torrent) }
+            }
+            .contextMenu(forSelectionType: String.self) { hashes in
+                contextMenu(for: torrents(for: hashes))
+            }
+            .onDeleteCommand { viewModel.torrentsPendingRemoval = selectedTorrents }
+            .onKeyPress(.space) {
+                guard !selectedTorrents.isEmpty else { return .ignored }
+                viewModel.togglePause(selectedTorrents)
+                return .handled
             }
             .listStyle(.inset)
             .overlay {
@@ -28,6 +33,25 @@ struct TorrentListView: View {
         }
         .searchable(text: $viewModel.searchText, placement: .toolbar, prompt: "Buscar torrents")
         .navigationTitle("Torrents")
+        .toolbar {
+            ToolbarItem {
+                Menu {
+                    Picker("Ordenar por", selection: $viewModel.sortKey) {
+                        ForEach(TorrentSortKey.allCases) { Text($0.title).tag($0) }
+                    }
+                    Divider()
+                    Toggle("Orden ascendente", isOn: $viewModel.sortAscending)
+                } label: {
+                    Label("Ordenar", systemImage: "arrow.up.arrow.down")
+                }
+            }
+        }
+    }
+
+    private var selectedTorrents: [Torrent] { torrents(for: selection) }
+
+    private func torrents(for hashes: Set<String>) -> [Torrent] {
+        viewModel.torrents.filter { hashes.contains($0.hash) }
     }
 
     @ViewBuilder
@@ -43,23 +67,29 @@ struct TorrentListView: View {
     }
 
     @ViewBuilder
-    private func contextMenu(for torrent: Torrent) -> some View {
-        if torrent.isActive {
-            Button("Pausar") { viewModel.pause(torrent) }
-        } else {
-            Button("Reanudar") { viewModel.resume(torrent) }
+    private func contextMenu(for torrents: [Torrent]) -> some View {
+        if !torrents.isEmpty {
+            Button(torrents.allSatisfy(\.isActive) ? "Pausar" : "Reanudar") { viewModel.togglePause(torrents) }
+            Button("Iniciar") { viewModel.start(torrents) }
+            Button("Detener") { viewModel.stop(torrents) }
+            Divider()
+            Menu("Etiqueta") {
+                Button("Sin etiqueta") { viewModel.setLabel(torrents, label: "") }
+                ForEach(viewModel.availableLabels, id: \.self) { label in
+                    Button(label) { viewModel.setLabel(torrents, label: label) }
+                }
+            }
+            Button("Verificar hash") { viewModel.recheck(torrents) }
+            Divider()
+            Button("Eliminar…", role: .destructive) { viewModel.torrentsPendingRemoval = torrents }
         }
-        Button("Iniciar") { viewModel.start(torrent) }
-        Button("Detener") { viewModel.stop(torrent) }
-        Divider()
-        Button("Verificar hash") { viewModel.recheck(torrent) }
-        Divider()
-        Button("Eliminar…", role: .destructive) { viewModel.remove(torrent) }
     }
 }
 
 private struct ErrorBanner: View {
     let message: String
+    var countdown: Int?
+    var onRetry: () -> Void
     var body: some View {
         HStack {
             Image(systemName: "exclamationmark.triangle.fill")
@@ -68,6 +98,13 @@ private struct ErrorBanner: View {
                 .font(.callout)
                 .lineLimit(2)
             Spacer()
+            if let countdown {
+                Text("Reintentando en \(countdown) s")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Button("Reintentar ahora", action: onRetry)
+                    .controlSize(.small)
+            }
         }
         .padding(8)
         .background(Color.orange.opacity(0.12))

@@ -10,10 +10,16 @@ struct TorrentDetailView: View {
     @State private var isLoadingFiles = false
     @State private var labelDraft: String = ""
     @State private var filesErrorMessage: String?
+    @State private var trackers: [TorrentTracker] = []
+    @State private var peers: [TorrentPeer] = []
+    @State private var moveDestination: String = ""
+    @State private var showingMove = false
 
     enum Tab: String, CaseIterable, Identifiable {
         case info = "Información"
         case files = "Archivos"
+        case trackers = "Trackers"
+        case peers = "Pares"
         var id: String { rawValue }
     }
 
@@ -32,12 +38,68 @@ struct TorrentDetailView: View {
             switch tab {
             case .info: infoTab
             case .files: filesTab
+            case .trackers: trackersTab
+            case .peers: peersTab
             }
         }
         .navigationTitle(torrent.name)
         .task(id: torrent.hash) {
             labelDraft = torrent.label
             await loadFiles()
+        }
+        .task(id: "\(torrent.hash)-\(tab.rawValue)") {
+            // Trackers and peers refresh every few seconds while their tab is visible.
+            while !Task.isCancelled && (tab == .trackers || tab == .peers) {
+                await loadTrackersOrPeers()
+                try? await Task.sleep(nanoseconds: 4_000_000_000)
+            }
+        }
+        .alert("Mover datos", isPresented: $showingMove) {
+            TextField("Carpeta destino en el servidor", text: $moveDestination)
+            Button("Mover") { viewModel.move([torrent], to: moveDestination) }
+            Button("Cancelar", role: .cancel) {}
+        } message: {
+            Text("Ruta absoluta en el servidor. El torrent se detendrá, los archivos se moverán y se reanudará si estaba activo.")
+        }
+    }
+
+    private var trackersTab: some View {
+        List(trackers) { tracker in
+            VStack(alignment: .leading, spacing: 2) {
+                Text(tracker.url).lineLimit(1)
+                Text("\(tracker.isEnabled ? "Activo" : "Desactivado") · \(tracker.seeders) seeders · \(tracker.leechers) leechers\(tracker.failures > 0 ? " · \(tracker.failures) fallos" : "")")
+                    .font(.caption)
+                    .foregroundStyle(tracker.failures > 0 ? .orange : .secondary)
+            }
+        }
+        .listStyle(.inset)
+        .overlay { if trackers.isEmpty { Text("Sin trackers").foregroundStyle(.secondary) } }
+    }
+
+    private var peersTab: some View {
+        List(peers) { peer in
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(peer.address):\(peer.port)")
+                    Text(peer.client.isEmpty ? "Cliente desconocido" : peer.client)
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Text("\(peer.percent)%").foregroundStyle(.secondary)
+                Text("↓ \(Formatters.rate(peer.downRate))  ↑ \(Formatters.rate(peer.upRate))")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        .listStyle(.inset)
+        .overlay { if peers.isEmpty { Text("Sin pares conectados").foregroundStyle(.secondary) } }
+    }
+
+    private func loadTrackersOrPeers() async {
+        guard let client = viewModel.clientForDetail else { return }
+        if tab == .trackers {
+            trackers = (try? await client.fetchTrackers(hash: torrent.hash)) ?? trackers
+        } else {
+            peers = (try? await client.fetchPeers(hash: torrent.hash)) ?? peers
         }
     }
 
@@ -94,7 +156,8 @@ struct TorrentDetailView: View {
                     }
                     Button("Detener") { viewModel.stop(torrent) }
                     Button("Verificar hash") { viewModel.recheck(torrent) }
-                    Button("Eliminar", role: .destructive) { viewModel.remove(torrent) }
+                    Button("Mover…") { moveDestination = torrent.baseDirectory; showingMove = true }
+                    Button("Eliminar", role: .destructive) { viewModel.torrentsPendingRemoval = [torrent] }
                 }
             }
         }

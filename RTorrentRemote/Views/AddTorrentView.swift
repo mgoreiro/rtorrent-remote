@@ -12,6 +12,7 @@ struct AddTorrentView: View {
     @State private var selectedFileURL: URL?
     @State private var startImmediately = true
     @State private var label: String = ""
+    @State private var directory: String = ""
     @State private var showingFileImporter = false
 
     enum Mode: String, CaseIterable, Identifiable {
@@ -49,6 +50,9 @@ struct AddTorrentView: View {
                 ForEach(availableLabels, id: \.self) { Text($0).tag($0) }
             }
 
+            TextField("Carpeta de descarga (vacío = la predeterminada del servidor)", text: $directory)
+                .textFieldStyle(.roundedBorder)
+
             Toggle("Empezar a descargar inmediatamente", isOn: $startImmediately)
 
             Spacer(minLength: 0)
@@ -62,7 +66,7 @@ struct AddTorrentView: View {
             }
         }
         .padding(20)
-        .frame(width: 460, height: 260)
+        .frame(width: 460, height: 300)
         .fileImporter(isPresented: $showingFileImporter, allowedContentTypes: [UTType(filenameExtension: "torrent") ?? .data]) { result in
             if case .success(let url) = result {
                 selectedFileURL = url
@@ -80,13 +84,13 @@ struct AddTorrentView: View {
     private func submit() {
         switch mode {
         case .magnet:
-            viewModel.addTorrent(uri: uri, startImmediately: startImmediately, label: label)
+            viewModel.addTorrent(uri: uri, startImmediately: startImmediately, label: label, directory: directory)
         case .file:
             guard let url = selectedFileURL else { return }
             let accessed = url.startAccessingSecurityScopedResource()
             defer { if accessed { url.stopAccessingSecurityScopedResource() } }
             if let data = try? Data(contentsOf: url) {
-                viewModel.addTorrent(fileData: data, startImmediately: startImmediately, label: label)
+                viewModel.addTorrent(fileData: data, startImmediately: startImmediately, label: label, directory: directory)
             }
         }
         dismiss()

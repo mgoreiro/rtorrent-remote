@@ -98,9 +98,9 @@ extension RTorrentClient {
     /// Adds a torrent from a magnet link or a direct .torrent URL, then tags it with `label`
     /// (when provided) using the info-hash computed client-side, so tagging is exact rather
     /// than a guess.
-    func addFromURI(_ uri: String, startImmediately: Bool, label: String? = nil) async throws {
+    func addFromURI(_ uri: String, startImmediately: Bool, label: String? = nil, directory: String? = nil) async throws {
         let method = startImmediately ? "load.start" : "load.normal"
-        _ = try await rpc.call(method, [.string(""), .string(uri)])
+        _ = try await rpc.call(method, [.string(""), .string(uri)] + Self.directoryCommand(directory))
         guard let label, !label.isEmpty else { return }
         if let hash = TorrentHash.infoHash(fromMagnetURI: uri) {
             // rTorrent needs a brief moment to register the newly loaded torrent.
@@ -111,13 +111,20 @@ extension RTorrentClient {
 
     /// Adds a torrent from the raw bytes of a `.torrent` file, then tags it with `label`
     /// (when provided) using the SHA-1 info-hash computed from the file itself.
-    func addFromFileData(_ data: Data, startImmediately: Bool, label: String? = nil) async throws {
+    func addFromFileData(_ data: Data, startImmediately: Bool, label: String? = nil, directory: String? = nil) async throws {
         let method = startImmediately ? "load.raw_start" : "load.raw"
-        _ = try await rpc.call(method, [.string(""), .base64(data)])
+        _ = try await rpc.call(method, [.string(""), .base64(data)] + Self.directoryCommand(directory))
         guard let label, !label.isEmpty else { return }
         if let hash = TorrentHash.infoHash(fromTorrentFileData: data) {
             try await Task.sleep(nanoseconds: 500_000_000)
             try? await setLabel(hash: hash, label: label)
         }
+    }
+
+    /// Extra `load.*` argument that makes the new torrent download into `directory`.
+    private static func directoryCommand(_ directory: String?) -> [XMLRPCValue] {
+        guard let directory = directory?.trimmingCharacters(in: .whitespaces), !directory.isEmpty else { return [] }
+        let escaped = directory.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")
+        return [.string("d.directory.set=\"\(escaped)\"")]
     }
 }

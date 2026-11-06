@@ -35,7 +35,22 @@
 		87760970207B14473F600C57 /* TorrentListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DB6099349B5E0E07FF90764 /* TorrentListView.swift */; };
 		EFC5BE9B322EF5567491B759 /* TorrentRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15CCFD56231F9CFEA86A91AB /* TorrentRowView.swift */; };
 		2C3D2A0684E9BE51615E2C90 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AD80D95CF1574C5F90AE1AFD /* Assets.xcassets */; };
+		B0F26A1C873B1C1CD17B147B /* RTorrentClient+Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45D78BAAC68237CCC616947A /* RTorrentClient+Data.swift */; };
+		8C5F1F76C229210E7CE23D26 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B71EB56CCE72059822A96BA /* Preferences.swift */; };
+		963C4BACB754BB56A161924A /* Notifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2E9365E9D4A70A9377C347B /* Notifier.swift */; };
+		8E7DF740257EE440032CAA79 /* TelegramBot.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFEF9A56120C0BB4B702CAD7 /* TelegramBot.swift */; };
+		A1B2C3D4E5F6071829304A0C /* RTorrentRemoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6071829304A02 /* RTorrentRemoteTests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A1B2C3D4E5F6071829304A08 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FD9DED678B6D5CFE986C2EAF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C8487F5CA4BE76C1951EFF9E;
+			remoteInfo = RTorrentRemote;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		7C6FC382035F209785089CAB /* RTorrentRemote.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RTorrentRemote.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -69,10 +84,23 @@
 		FCB642F77479F70C1B2A6520 /* TorrentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TorrentDetailView.swift; sourceTree = "<group>"; };
 		7DB6099349B5E0E07FF90764 /* TorrentListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TorrentListView.swift; sourceTree = "<group>"; };
 		15CCFD56231F9CFEA86A91AB /* TorrentRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TorrentRowView.swift; sourceTree = "<group>"; };
+		45D78BAAC68237CCC616947A /* RTorrentClient+Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTorrentClient+Data.swift"; sourceTree = "<group>"; };
+		1B71EB56CCE72059822A96BA /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Preferences.swift"; sourceTree = "<group>"; };
+		C2E9365E9D4A70A9377C347B /* Notifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notifier.swift"; sourceTree = "<group>"; };
+		FFEF9A56120C0BB4B702CAD7 /* TelegramBot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TelegramBot.swift"; sourceTree = "<group>"; };
+		A1B2C3D4E5F6071829304A02 /* RTorrentRemoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTorrentRemoteTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6071829304A03 /* RTorrentRemoteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RTorrentRemoteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		95F6CC2673AAC25640F93941 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1B2C3D4E5F6071829304A06 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -111,6 +139,8 @@
 		8EF3664405B684B701EB8848 /* Networking */ = {
 			isa = PBXGroup;
 			children = (
+				FFEF9A56120C0BB4B702CAD7 /* TelegramBot.swift */,
+				45D78BAAC68237CCC616947A /* RTorrentClient+Data.swift */,
 				4D233AAF58544CB691B3C8D2 /* RTorrentClient+Files.swift */,
 				6FC605A4B3911086DDDAD5D9 /* RTorrentClient+RSS.swift */,
 				9D85DB2D83BA11815DD6296C /* RTorrentClient+Settings.swift */,
@@ -126,6 +156,8 @@
 		5760D9D955643B2860352B51 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				C2E9365E9D4A70A9377C347B /* Notifier.swift */,
+				1B71EB56CCE72059822A96BA /* Preferences.swift */,
 				07F2FC8E97851BEE09E4159C /* AppState.swift */,
 				DB8251E5EDC114F55921F596 /* Formatters.swift */,
 				D4749514F76D2A82EB8D2A86 /* KeychainHelper.swift */,
@@ -163,6 +195,7 @@
 			isa = PBXGroup;
 			children = (
 				7C6FC382035F209785089CAB /* RTorrentRemote.app */,
+				A1B2C3D4E5F6071829304A03 /* RTorrentRemoteTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -171,8 +204,17 @@
 			isa = PBXGroup;
 			children = (
 				86F53EBA53F211109079D4E3 /* RTorrentRemote */,
+				A1B2C3D4E5F6071829304A04 /* RTorrentRemoteTests */,
 				8567AAD10B41A84EB06FB890 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		A1B2C3D4E5F6071829304A04 /* RTorrentRemoteTests */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6071829304A02 /* RTorrentRemoteTests.swift */,
+			);
+			path = RTorrentRemoteTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -195,7 +237,32 @@
 			productReference = 7C6FC382035F209785089CAB /* RTorrentRemote.app */;
 			productType = "com.apple.product-type.application";
 		};
+		A1B2C3D4E5F6071829304A01 /* RTorrentRemoteTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1B2C3D4E5F6071829304A09 /* Build configuration list for PBXNativeTarget "RTorrentRemoteTests" */;
+			buildPhases = (
+				A1B2C3D4E5F6071829304A05 /* Sources */,
+				A1B2C3D4E5F6071829304A06 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A1B2C3D4E5F6071829304A07 /* PBXTargetDependency */,
+			);
+			name = RTorrentRemoteTests;
+			productName = RTorrentRemoteTests;
+			productReference = A1B2C3D4E5F6071829304A03 /* RTorrentRemoteTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
+
+/* Begin PBXTargetDependency section */
+		A1B2C3D4E5F6071829304A07 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C8487F5CA4BE76C1951EFF9E /* RTorrentRemote */;
+			targetProxy = A1B2C3D4E5F6071829304A08 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 		FD9DED678B6D5CFE986C2EAF /* Project object */ = {
@@ -207,6 +274,10 @@
 				TargetAttributes = {
 					C8487F5CA4BE76C1951EFF9E = {
 						CreatedOnToolsVersion = 16.0;
+					};
+					A1B2C3D4E5F6071829304A01 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = C8487F5CA4BE76C1951EFF9E;
 					};
 				};
 			};
@@ -224,6 +295,7 @@
 			projectRoot = "";
 			targets = (
 				C8487F5CA4BE76C1951EFF9E /* RTorrentRemote */,
+				A1B2C3D4E5F6071829304A01 /* RTorrentRemoteTests */,
 			);
 		};
 /* End PBXProject section */
@@ -244,6 +316,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E7DF740257EE440032CAA79 /* TelegramBot.swift in Sources */,
+				963C4BACB754BB56A161924A /* Notifier.swift in Sources */,
+				8C5F1F76C229210E7CE23D26 /* Preferences.swift in Sources */,
+				B0F26A1C873B1C1CD17B147B /* RTorrentClient+Data.swift in Sources */,
 				23913B18CE1102CA945DC1DF /* RTorrentRemoteApp.swift in Sources */,
 				2C6903A492EEB9E3B4134D26 /* ConnectionProfile.swift in Sources */,
 				0820D3E26E9F391D7E43983A /* RSSFeed.swift in Sources */,
@@ -271,6 +347,14 @@
 				E067DD5B4E83F47F4C99033F /* TorrentDetailView.swift in Sources */,
 				87760970207B14473F600C57 /* TorrentListView.swift in Sources */,
 				EFC5BE9B322EF5567491B759 /* TorrentRowView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1B2C3D4E5F6071829304A05 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1B2C3D4E5F6071829304A0C /* RTorrentRemoteTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -387,6 +471,36 @@
 			};
 			name = Release;
 		};
+		A1B2C3D4E5F6071829304A0A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.miguel.RTorrentRemoteTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RTorrentRemote.app/Contents/MacOS/RTorrentRemote";
+			};
+			name = Debug;
+		};
+		A1B2C3D4E5F6071829304A0B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.miguel.RTorrentRemoteTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RTorrentRemote.app/Contents/MacOS/RTorrentRemote";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -404,6 +518,15 @@
 			buildConfigurations = (
 				87F3AD17E75055E2C68EB175 /* Debug */,
 				413DC0470535E34CB60D107B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1B2C3D4E5F6071829304A09 /* Build configuration list for PBXNativeTarget "RTorrentRemoteTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1B2C3D4E5F6071829304A0A /* Debug */,
+				A1B2C3D4E5F6071829304A0B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

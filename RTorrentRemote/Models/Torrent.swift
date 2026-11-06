@@ -104,3 +104,52 @@ enum FilePriority: Int, CaseIterable, Identifiable {
         }
     }
 }
+
+struct TorrentTracker: Identifiable, Hashable {
+    let index: Int
+    var url: String
+    var isEnabled: Bool
+    var seeders: Int
+    var leechers: Int
+    var failures: Int
+    var id: Int { index }
+}
+
+struct TorrentPeer: Identifiable, Hashable {
+    let index: Int
+    var address: String
+    var port: Int
+    var client: String
+    var downRate: Int64
+    var upRate: Int64
+    var percent: Int
+    var id: Int { index }
+}
+
+enum TorrentSortKey: String, CaseIterable, Identifiable {
+    case name, size, progress, ratio, downRate, upRate
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .name: return "Nombre"
+        case .size: return "Tamaño"
+        case .progress: return "Progreso"
+        case .ratio: return "Ratio"
+        case .downRate: return "Velocidad de bajada"
+        case .upRate: return "Velocidad de subida"
+        }
+    }
+
+    /// True when `a` should come before `b` in ascending order.
+    func isOrderedBefore(_ a: Torrent, _ b: Torrent) -> Bool {
+        switch self {
+        case .name: return a.name.localizedCompare(b.name) == .orderedAscending
+        case .size: return a.sizeBytes < b.sizeBytes
+        case .progress: return a.progress < b.progress
+        case .ratio: return a.ratio < b.ratio
+        case .downRate: return a.downRate < b.downRate
+        case .upRate: return a.upRate < b.upRate
+        }
+    }
+}

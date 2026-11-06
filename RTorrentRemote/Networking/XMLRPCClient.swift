@@ -1,4 +1,6 @@
 import Foundation
+import CryptoKit
+import Security
 
 /// Speaks XML-RPC over HTTP(S) to an endpoint such as `http://host/RPC2`,
 /// which is typically nginx or socat sitting in front of rTorrent's SCGI socket.
@@ -9,6 +11,15 @@ final class XMLRPCClient: NSObject {
     var password: String?
     var timeout: TimeInterval = 20
     private let allowInsecureTLS: Bool
+    private let pinnedCertSHA256: String
+    private let fingerprintLock = NSLock()
+    private var _lastServerFingerprint: String?
+
+    /// SHA-256 (hex) of the leaf certificate seen in the most recent TLS handshake; used to offer "pin this certificate".
+    var lastServerFingerprint: String? {
+        fingerprintLock.lock(); defer { fingerprintLock.unlock() }
+        return _lastServerFingerprint
+    }
 
     private lazy var session: URLSession = {
         let config = URLSessionConfiguration.ephemeral
@@ -17,11 +28,12 @@ final class XMLRPCClient: NSObject {
         return URLSession(configuration: config, delegate: self, delegateQueue: nil)
     }()
 
-    init(endpoint: URL, username: String? = nil, password: String? = nil, allowInsecureTLS: Bool = false) {
+    init(endpoint: URL, username: String? = nil, password: String? = nil, allowInsecureTLS: Bool = false, pinnedCertSHA256: String = "") {
         self.endpoint = endpoint
         self.username = username
         self.password = password
         self.allowInsecureTLS = allowInsecureTLS
+        self.pinnedCertSHA256 = pinnedCertSHA256.replacingOccurrences(of: ":", with: "").lowercased()
         super.init()
     }
 
@@ -75,15 +87,33 @@ final class XMLRPCClient: NSObject {
 }
 
 extension XMLRPCClient: URLSessionDelegate {
-    /// Only used when the user explicitly opted in to "Aceptar certificados no verificados"
-    /// in Settings, for home servers using a self-signed certificate.
+    /// TLS trust decisions. Priority: (1) a pinned certificate must match exactly; (2) otherwise
+    /// self-signed certificates are accepted only if the user opted in; (3) otherwise default system validation.
     func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        guard allowInsecureTLS,
-              challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
+        guard challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
               let serverTrust = challenge.protectionSpace.serverTrust else {
             completionHandler(.performDefaultHandling, nil)
             return
         }
-        completionHandler(.useCredential, URLCredential(trust: serverTrust))
+        let fingerprint = Self.leafFingerprint(of: serverTrust)
+        fingerprintLock.lock(); _lastServerFingerprint = fingerprint; fingerprintLock.unlock()
+
+        if !pinnedCertSHA256.isEmpty {
+            if fingerprint == pinnedCertSHA256 {
+                completionHandler(.useCredential, URLCredential(trust: serverTrust))
+            } else {
+                completionHandler(.cancelAuthenticationChallenge, nil)
+            }
+        } else if allowInsecureTLS {
+            completionHandler(.useCredential, URLCredential(trust: serverTrust))
+        } else {
+            completionHandler(.performDefaultHandling, nil)
+        }
+    }
+
+    static func leafFingerprint(of trust: SecTrust) -> String? {
+        guard let chain = SecTrustCopyCertificateChain(trust) as? [SecCertificate], let leaf = chain.first else { return nil }
+        let digest = SHA256.hash(data: SecCertificateCopyData(leaf) as Data)
+        return digest.map { String(format: "%02x", $0) }.joined()
     }
 }

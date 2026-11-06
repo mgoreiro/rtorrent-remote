@@ -12,7 +12,7 @@ final class RTorrentClient {
             self.rpc = XMLRPCClient(endpoint: URL(string: "http://localhost")!)
             return
         }
-        self.rpc = XMLRPCClient(endpoint: url, username: profile.username, password: password, allowInsecureTLS: profile.allowInsecureTLS)
+        self.rpc = XMLRPCClient(endpoint: url, username: profile.username, password: password, allowInsecureTLS: profile.allowInsecureTLS, pinnedCertSHA256: profile.pinnedCertSHA256)
     }
 
     /// Simple connectivity + version check, used by "Probar conexión" in Settings.
