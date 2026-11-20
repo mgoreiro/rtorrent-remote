@@ -4,6 +4,7 @@ import Foundation
 enum Preferences {
     static let trashPathKey = "serverTrashPath"
     static let notificationsKey = "notificationsEnabled"
+    static let deleteTorrentFileKey = "deleteTorrentFileAfterAdd"
     static let telegramEnabledKey = "telegramEnabled"
     static let telegramChatIDsKey = "telegramAllowedChatIDs"
 
@@ -14,6 +15,11 @@ enum Preferences {
 
     static var dataDisposal: DataDisposal {
         trashPath.isEmpty ? .delete : .moveToTrash(trashPath)
+    }
+
+    /// Move the local `.torrent` file to the Trash once it was added successfully (default: on).
+    static var deleteTorrentFileAfterAdd: Bool {
+        UserDefaults.standard.object(forKey: deleteTorrentFileKey) as? Bool ?? true
     }
 
     static var notificationsEnabled: Bool {

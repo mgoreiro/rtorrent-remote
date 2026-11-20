@@ -14,6 +14,7 @@ struct AddTorrentView: View {
     @State private var label: String = ""
     @State private var directory: String = ""
     @State private var showingFileImporter = false
+    @AppStorage(Preferences.deleteTorrentFileKey) private var deleteTorrentFile = true
 
     enum Mode: String, CaseIterable, Identifiable {
         case magnet = "Magnet / URL"
@@ -43,6 +44,7 @@ struct AddTorrentView: View {
                     Spacer()
                     Button("Elegir…") { showingFileImporter = true }
                 }
+                Toggle("Mover el archivo .torrent a la papelera tras añadirlo", isOn: $deleteTorrentFile)
             }
 
             Picker("Etiqueta", selection: $label) {
@@ -66,7 +68,7 @@ struct AddTorrentView: View {
             }
         }
         .padding(20)
-        .frame(width: 460, height: 300)
+        .frame(width: 460, height: 330)
         .fileImporter(isPresented: $showingFileImporter, allowedContentTypes: [UTType(filenameExtension: "torrent") ?? .data]) { result in
             if case .success(let url) = result {
                 selectedFileURL = url
@@ -87,11 +89,7 @@ struct AddTorrentView: View {
             viewModel.addTorrent(uri: uri, startImmediately: startImmediately, label: label, directory: directory)
         case .file:
             guard let url = selectedFileURL else { return }
-            let accessed = url.startAccessingSecurityScopedResource()
-            defer { if accessed { url.stopAccessingSecurityScopedResource() } }
-            if let data = try? Data(contentsOf: url) {
-                viewModel.addTorrent(fileData: data, startImmediately: startImmediately, label: label, directory: directory)
-            }
+            viewModel.addTorrentFile(at: url, startImmediately: startImmediately, label: label, directory: directory)
         }
         dismiss()
     }

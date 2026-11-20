@@ -153,3 +153,25 @@ enum TorrentSortKey: String, CaseIterable, Identifiable {
         }
     }
 }
+
+/// Sharing statistics shown in the detail view. Dates are nil when the server does not provide them.
+struct TorrentStats: Equatable {
+    var addedDate: Date?
+    /// True when `addedDate` is only an approximation (first-start timestamp) because the torrent
+    /// has no `addtime` marker (torrents added outside this app / ruTorrent).
+    var addedIsApproximate = false
+    var finishedDate: Date?
+    var creationDate: Date?
+    var uploadedBytes: Int64 = 0
+    var downloadedBytes: Int64 = 0
+
+    /// How long the torrent has existed on the server.
+    func timeOnServer(now: Date = Date()) -> TimeInterval? {
+        addedDate.map { max(0, now.timeIntervalSince($0)) }
+    }
+
+    /// How long it has been available to share since it completed.
+    func timeSharing(now: Date = Date()) -> TimeInterval? {
+        finishedDate.map { max(0, now.timeIntervalSince($0)) }
+    }
+}

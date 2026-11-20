@@ -122,3 +122,24 @@ final class TorrentHashTests: XCTestCase {
         XCTAssertNil(TorrentHash.infoHash(fromMagnetURI: "not a magnet"))
     }
 }
+
+final class StatsTests: XCTestCase {
+    func testDurationFormatting() {
+        XCTAssertEqual(Formatters.duration(30), "30 s")
+        XCTAssertEqual(Formatters.duration(125), "2 min")
+        XCTAssertEqual(Formatters.duration(3 * 3600 + 5 * 60), "3 h 5 min")
+        XCTAssertEqual(Formatters.duration(2 * 86_400 + 4 * 3600), "2 d 4 h")
+        XCTAssertEqual(Formatters.duration(86_400), "1 d")
+        XCTAssertEqual(Formatters.duration(-5), "0 s")
+    }
+
+    func testTimeOnServerAndSharing() {
+        let now = Date(timeIntervalSince1970: 1_000_000)
+        var stats = TorrentStats()
+        XCTAssertNil(stats.timeOnServer(now: now))
+        stats.addedDate = now.addingTimeInterval(-7200)
+        stats.finishedDate = now.addingTimeInterval(-3600)
+        XCTAssertEqual(stats.timeOnServer(now: now), 7200)
+        XCTAssertEqual(stats.timeSharing(now: now), 3600)
+    }
+}

@@ -10,6 +10,7 @@ struct TorrentDetailView: View {
     @State private var isLoadingFiles = false
     @State private var labelDraft: String = ""
     @State private var filesErrorMessage: String?
+    @State private var stats: TorrentStats?
     @State private var trackers: [TorrentTracker] = []
     @State private var peers: [TorrentPeer] = []
     @State private var moveDestination: String = ""
@@ -46,6 +47,13 @@ struct TorrentDetailView: View {
         .task(id: torrent.hash) {
             labelDraft = torrent.label
             await loadFiles()
+        }
+        .task(id: torrent.hash) {
+            stats = nil
+            while !Task.isCancelled {
+                if let client = viewModel.clientForDetail { stats = await client.fetchStats(hash: torrent.hash) }
+                try? await Task.sleep(nanoseconds: 10_000_000_000)
+            }
         }
         .task(id: "\(torrent.hash)-\(tab.rawValue)") {
             // Trackers and peers refresh every few seconds while their tab is visible.
@@ -130,6 +138,24 @@ struct TorrentDetailView: View {
                 LabeledContent("Peers conectados", value: "\(torrent.peersConnected)")
                 LabeledContent("Seeders", value: "\(torrent.seedersConnected)")
                 LabeledContent("ETA aprox.", value: Formatters.eta(bytesRemaining: torrent.sizeBytes - torrent.completedBytes, ratePerSecond: torrent.downRate))
+            }
+
+            Section("Estadísticas de compartición") {
+                if let stats {
+                    LabeledContent(stats.addedIsApproximate ? "Añadido (aprox.)" : "Añadido",
+                                   value: stats.addedDate.map(Formatters.dateTime) ?? "—")
+                    LabeledContent("Completado", value: stats.finishedDate.map(Formatters.dateTime) ?? (torrent.isComplete ? "—" : "No completado"))
+                    LabeledContent("Tiempo en el servidor", value: stats.timeOnServer().map(Formatters.duration) ?? "—")
+                    LabeledContent("Tiempo compartiendo", value: stats.timeSharing().map(Formatters.duration) ?? "—")
+                    LabeledContent("Subido en total", value: Formatters.bytes(stats.uploadedBytes))
+                    LabeledContent("Descargado en total", value: Formatters.bytes(stats.downloadedBytes))
+                    LabeledContent("Ratio", value: Formatters.ratio(torrent.ratio))
+                    if let created = stats.creationDate {
+                        LabeledContent("Creado (en el .torrent)", value: Formatters.dateTime(created))
+                    }
+                } else {
+                    ProgressView().controlSize(.small)
+                }
             }
 
             Section("Ubicación") {
