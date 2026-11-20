@@ -2,6 +2,8 @@
 
 App nativa de macOS (SwiftUI) para controlar una instancia remota de **rTorrent** por XML-RPC sobre HTTP.
 
+Software libre bajo licencia [GPL-3.0-or-later](LICENSE) · © 2026 Miguel González Oreiro <mgoreiro@gmail.com>
+
 ## Requisito en el servidor
 
 rTorrent no habla HTTP de forma nativa: expone su RPC por un socket **SCGI**. Para que esta app
@@ -88,3 +90,15 @@ sobre HTTP real; socat solo por sí solo no traduce SCGI a HTTP).
 - Si tu proxy usa un certificado autofirmado, activa "Aceptar certificados no verificados" en
   Ajustes: la app confiará en cualquier certificado servido por ese host (uso pensado para
   servidores domésticos propios, no para redes no confiables).
+
+## Licencia
+
+Copyright (C) 2026 Miguel González Oreiro <mgoreiro@gmail.com>
+
+Este programa es software libre: puedes redistribuirlo y/o modificarlo bajo los términos de la Licencia
+Pública General de GNU publicada por la Free Software Foundation, ya sea la versión 3 o (a tu elección)
+cualquier versión posterior.
+
+Se distribuye con la esperanza de que sea útil, pero **sin ninguna garantía**, ni siquiera la garantía
+implícita de comerciabilidad o idoneidad para un propósito particular. Consulta el texto completo en
+[LICENSE](LICENSE) o en <https://www.gnu.org/licenses/>.
