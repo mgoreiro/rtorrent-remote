@@ -25,7 +25,7 @@
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Uso personal.</string>
+	<string>© 2026 Miguel González Oreiro. Software libre bajo licencia GPL-3.0 o posterior.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>CFBundleURLTypes</key>

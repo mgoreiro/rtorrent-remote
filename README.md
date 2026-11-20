@@ -2,6 +2,8 @@
 
 App nativa de macOS (SwiftUI) para controlar una instancia remota de **rTorrent** por XML-RPC sobre HTTP.
 
+Software libre bajo licencia [GPL-3.0-or-later](LICENSE) · © 2026 Miguel González Oreiro <mgoreiro@gmail.com>
+
 ## Requisito en el servidor
 
 rTorrent no habla HTTP de forma nativa: expone su RPC por un socket **SCGI**. Para que esta app
@@ -55,10 +57,15 @@ túnel SSH puedes hacer `ssh -L 5001:localhost:5001 usuario@servidor` y apuntar 
 `http://localhost:5001/` con HTTPS desactivado (nginx sigue siendo necesario si quieres XML-RPC
 sobre HTTP real; socat solo por sí solo no traduce SCGI a HTTP).
 
+## Instalación
+
+Requiere macOS 14 o superior. Descarga `RTorrentRemote-<versión>.dmg` de la
+[última release](https://github.com/mgoreiro/rtorrent-remote/releases/latest) y arrastra la app a
+Aplicaciones. La app no está notarizada por Apple: la primera vez, clic derecho → Abrir.
+
 ## Abrir el proyecto
 
-1. Copia esta carpeta (`RTorrentRemote`) a
-   `/Users/miguel/Documents/XCode/Utilidades_MacOS/RTorrentRemote`.
+1. Clona el repositorio: `git clone https://github.com/mgoreiro/rtorrent-remote.git`.
 2. Abre `RTorrentRemote.xcodeproj` con Xcode 16 (o el que tengas instalado; el proyecto usa
    `objectVersion = 56`, compatible con Xcode 15/16).
 3. Selecciona tu equipo de firma en el target `RTorrentRemote` → *Signing & Capabilities*
@@ -88,3 +95,15 @@ sobre HTTP real; socat solo por sí solo no traduce SCGI a HTTP).
 - Si tu proxy usa un certificado autofirmado, activa "Aceptar certificados no verificados" en
   Ajustes: la app confiará en cualquier certificado servido por ese host (uso pensado para
   servidores domésticos propios, no para redes no confiables).
+
+## Licencia
+
+Copyright (C) 2026 Miguel González Oreiro <mgoreiro@gmail.com>
+
+Este programa es software libre: puedes redistribuirlo y/o modificarlo bajo los términos de la Licencia
+Pública General de GNU publicada por la Free Software Foundation, ya sea la versión 3 o (a tu elección)
+cualquier versión posterior.
+
+Se distribuye con la esperanza de que sea útil, pero **sin ninguna garantía**, ni siquiera la garantía
+implícita de comerciabilidad o idoneidad para un propósito particular. Consulta el texto completo en
+[LICENSE](LICENSE) o en <https://www.gnu.org/licenses/>.
