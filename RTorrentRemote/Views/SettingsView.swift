@@ -7,6 +7,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
 
     @AppStorage(Preferences.trashPathKey) private var trashPath = ""
+    @AppStorage(Preferences.deleteTorrentFileKey) private var deleteTorrentFile = true
     @AppStorage(Preferences.notificationsKey) private var notificationsEnabled = true
     @AppStorage(Preferences.telegramEnabledKey) private var telegramEnabled = false
     @AppStorage(Preferences.telegramChatIDsKey) private var telegramChatIDs = ""
@@ -100,6 +101,7 @@ struct SettingsView: View {
 
             Section {
                 Toggle("Notificar cuando termine una descarga", isOn: $notificationsEnabled)
+                Toggle("Mover a la papelera los archivos .torrent tras añadirlos", isOn: $deleteTorrentFile)
                 TextField("Papelera en el servidor (vacío = borrar definitivamente)", text: $trashPath)
             } header: {
                 Text("Notificaciones y borrado")

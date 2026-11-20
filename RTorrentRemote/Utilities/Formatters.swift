@@ -23,6 +23,20 @@ enum Formatters {
         String(format: "%.1f%%", value * 100)
     }
 
+    /// Elapsed time such as "3 d 4 h" or "12 min" (two most significant units).
+    static func duration(_ seconds: TimeInterval) -> String {
+        let total = Int(max(0, seconds))
+        let d = total / 86_400, h = (total % 86_400) / 3_600, m = (total % 3_600) / 60
+        if d > 0 { return h > 0 ? "\(d) d \(h) h" : "\(d) d" }
+        if h > 0 { return m > 0 ? "\(h) h \(m) min" : "\(h) h" }
+        if m > 0 { return "\(m) min" }
+        return "\(total) s"
+    }
+
+    static func dateTime(_ date: Date) -> String {
+        date.formatted(date: .abbreviated, time: .shortened)
+    }
+
     /// Rough remaining-time estimate given bytes left and current rate.
     static func eta(bytesRemaining: Int64, ratePerSecond: Int64) -> String {
         guard ratePerSecond > 0 else { return "—" }

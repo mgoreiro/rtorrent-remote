@@ -244,16 +244,40 @@ final class TorrentListViewModel: ObservableObject {
         }
     }
 
+    /// Adds a local `.torrent` file and, only if the server accepted it, moves the file to the Trash
+    /// when the "delete .torrent after adding" preference is on.
+    func addTorrentFile(at url: URL, startImmediately: Bool, label: String, directory: String = "") {
+        guard let client = appState?.client else { return }
+        let accessed = url.startAccessingSecurityScopedResource()
+        guard let data = try? Data(contentsOf: url) else {
+            if accessed { url.stopAccessingSecurityScopedResource() }
+            errorMessage = "No se pudo leer el archivo \(url.lastPathComponent)."
+            return
+        }
+        Task {
+            defer { if accessed { url.stopAccessingSecurityScopedResource() } }
+            do {
+                try await client.addFromFileData(data, startImmediately: startImmediately,
+                                                 label: label.isEmpty ? nil : label, directory: directory)
+                if Preferences.deleteTorrentFileAfterAdd {
+                    do { try FileManager.default.trashItem(at: url, resultingItemURL: nil) }
+                    catch { errorMessage = "Torrent añadido, pero no se pudo mover \(url.lastPathComponent) a la papelera: \(error.localizedDescription)" }
+                }
+                await refresh()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
+    }
+
     /// Handles a magnet link, a `.torrent` URL or a local `.torrent` file (drag & drop / open-with).
     func addFromExternal(url: URL) {
         if url.isFileURL {
-            let accessed = url.startAccessingSecurityScopedResource()
-            defer { if accessed { url.stopAccessingSecurityScopedResource() } }
-            guard url.pathExtension.lowercased() == "torrent", let data = try? Data(contentsOf: url) else {
-                errorMessage = "No se pudo leer el archivo \(url.lastPathComponent)."
+            guard url.pathExtension.lowercased() == "torrent" else {
+                errorMessage = "\(url.lastPathComponent) no es un archivo .torrent."
                 return
             }
-            addTorrent(fileData: data, startImmediately: true, label: "")
+            addTorrentFile(at: url, startImmediately: true, label: "")
         } else {
             addTorrent(uri: url.absoluteString, startImmediately: true, label: "")
         }

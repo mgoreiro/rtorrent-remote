@@ -74,6 +74,34 @@ extension RTorrentClient {
         _ = try await rpc.call("execute.throw", params)
     }
 
+    // MARK: - Sharing statistics
+
+    /// Reads each value separately so a method missing on an older rTorrent only blanks that field
+    /// instead of failing the whole panel.
+    func fetchStats(hash: String) async -> TorrentStats {
+        func int(_ method: String, _ extra: [XMLRPCValue] = []) async -> Int64? {
+            try? await rpc.call(method, [.string(hash)] + extra).int64Value
+        }
+        func date(_ seconds: Int64?) -> Date? {
+            guard let seconds, seconds > 0 else { return nil }
+            return Date(timeIntervalSince1970: TimeInterval(seconds))
+        }
+        var stats = TorrentStats()
+        // `addtime` is written by this app (and ruTorrent) when a torrent is loaded.
+        let addTime = (try? await rpc.call("d.custom", [.string(hash), .string("addtime")]).stringValue).flatMap { Int64($0) }
+        if let added = date(addTime) {
+            stats.addedDate = added
+        } else if let started = date(await int("d.timestamp.started")) {
+            stats.addedDate = started
+            stats.addedIsApproximate = true
+        }
+        stats.finishedDate = date(await int("d.timestamp.finished"))
+        stats.creationDate = date(await int("d.creation_date"))
+        stats.uploadedBytes = await int("d.up.total") ?? 0
+        stats.downloadedBytes = await int("d.down.total") ?? 0
+        return stats
+    }
+
     // MARK: - Trackers & peers
 
     func fetchTrackers(hash: String) async throws -> [TorrentTracker] {

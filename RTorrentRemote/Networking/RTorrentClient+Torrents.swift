@@ -100,7 +100,7 @@ extension RTorrentClient {
     /// than a guess.
     func addFromURI(_ uri: String, startImmediately: Bool, label: String? = nil, directory: String? = nil) async throws {
         let method = startImmediately ? "load.start" : "load.normal"
-        _ = try await rpc.call(method, [.string(""), .string(uri)] + Self.directoryCommand(directory))
+        _ = try await rpc.call(method, [.string(""), .string(uri)] + Self.loadCommands(directory: directory))
         guard let label, !label.isEmpty else { return }
         if let hash = TorrentHash.infoHash(fromMagnetURI: uri) {
             // rTorrent needs a brief moment to register the newly loaded torrent.
@@ -113,7 +113,7 @@ extension RTorrentClient {
     /// (when provided) using the SHA-1 info-hash computed from the file itself.
     func addFromFileData(_ data: Data, startImmediately: Bool, label: String? = nil, directory: String? = nil) async throws {
         let method = startImmediately ? "load.raw_start" : "load.raw"
-        _ = try await rpc.call(method, [.string(""), .base64(data)] + Self.directoryCommand(directory))
+        _ = try await rpc.call(method, [.string(""), .base64(data)] + Self.loadCommands(directory: directory))
         guard let label, !label.isEmpty else { return }
         if let hash = TorrentHash.infoHash(fromTorrentFileData: data) {
             try await Task.sleep(nanoseconds: 500_000_000)
@@ -122,9 +122,13 @@ extension RTorrentClient {
     }
 
     /// Extra `load.*` argument that makes the new torrent download into `directory`.
-    private static func directoryCommand(_ directory: String?) -> [XMLRPCValue] {
-        guard let directory = directory?.trimmingCharacters(in: .whitespaces), !directory.isEmpty else { return [] }
-        let escaped = directory.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")
-        return [.string("d.directory.set=\"\(escaped)\"")]
+    private static func loadCommands(directory: String?) -> [XMLRPCValue] {
+        // Records when the torrent was added (same `addtime` key ruTorrent uses).
+        var commands: [XMLRPCValue] = [.string("d.custom.set=addtime,\(Int(Date().timeIntervalSince1970))")]
+        if let directory = directory?.trimmingCharacters(in: .whitespaces), !directory.isEmpty {
+            let escaped = directory.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")
+            commands.append(.string("d.directory.set=\"\(escaped)\""))
+        }
+        return commands
     }
 }
